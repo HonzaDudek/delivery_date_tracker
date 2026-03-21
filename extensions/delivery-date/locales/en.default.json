@@ -1,0 +1,8 @@
+{
+  "estimated_delivery": "Estimated Delivery",
+  "arrives_by": "Arrives by {{ date }}",
+  "delivery_range": "{{ start }} – {{ end }}",
+  "via_carrier": "via {{ carrier }}",
+  "unavailable": "Delivery estimate unavailable",
+  "loading": "Calculating delivery estimate..."
+}

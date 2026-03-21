@@ -1,0 +1,33 @@
+# This file stores configurations for your Shopify app.
+# Learn more: https://shopify.dev/docs/apps/tools/cli/configuration
+
+scopes = "read_products,read_shipping,write_shipping"
+name = "Estimated Delivery Dates"
+
+[webhooks]
+api_version = "2025-01"
+
+  [webhooks.privacy_compliance]
+  customer_data_request_url = "/api/webhooks/gdpr/customers-data-request"
+  customer_deletion_url = "/api/webhooks/gdpr/customers-redact"
+  shop_deletion_url = "/api/webhooks/gdpr/shop-redact"
+
+[app_proxy]
+url = "/api/estimate"
+subpath = "delivery-estimate"
+prefix = "apps"
+
+[auth]
+redirect_urls = [
+  "https://localhost/auth/callback",
+  "https://localhost/auth/shopify/callback",
+  "https://localhost/api/auth/callback"
+]
+
+[pos]
+embedded = false
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = ""
+include_config_on_deploy = true

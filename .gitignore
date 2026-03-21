@@ -1,0 +1,29 @@
+node_modules/
+build/
+.cache/
+dist/
+
+# Prisma
+prisma/dev.db
+prisma/dev.db-journal
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Shopify CLI
+.shopify/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+coverage/

@@ -1,0 +1,39 @@
+api_version = "2025-01"
+name = "Estimated Delivery Date"
+type = "theme"
+
+  [[extensions.blocks]]
+  template = "blocks/delivery-date.liquid"
+  name = "Delivery Date Estimate"
+  target = "section"
+
+  [extensions.blocks.default]
+  heading = "Estimated Delivery"
+  loading_text = "Calculating delivery estimate..."
+
+[[extensions.settings]]
+  key = "heading"
+  type = "text"
+  label = "Heading text"
+  default = "Estimated Delivery"
+
+[[extensions.settings]]
+  key = "show_carrier"
+  type = "checkbox"
+  label = "Show carrier name"
+  default = true
+
+[[extensions.settings]]
+  key = "date_format"
+  type = "select"
+  label = "Date format"
+  default = "long"
+  [[extensions.settings.options]]
+    label = "Long (March 25, 2026)"
+    value = "long"
+  [[extensions.settings.options]]
+    label = "Short (Mar 25)"
+    value = "short"
+  [[extensions.settings.options]]
+    label = "Numeric (03/25/2026)"
+    value = "numeric"
