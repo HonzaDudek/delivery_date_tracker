@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData, useSubmit } from "@remix-run/react";
+import { useLoaderData, useSubmit, useNavigate } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -11,6 +11,7 @@ import {
   EmptyState,
   BlockStack,
 } from "@shopify/polaris";
+import { useCallback } from "react";
 
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
@@ -50,23 +51,24 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 export default function Zones() {
   const { zones } = useLoaderData<typeof loader>();
-  const submit = useSubmit();
-
-  const handleDelete = (zoneId: string) => {
-    const formData = new FormData();
-    formData.set("intent", "delete");
-    formData.set("zoneId", zoneId);
-    submit(formData, { method: "post" });
-  };
+  const navigate = useNavigate();
 
   const resourceName = {
     singular: "shipping zone",
     plural: "shipping zones",
   };
 
+  const handleRowClick = useCallback(
+    (id: string) => {
+      navigate(`/app/zones/${id}`);
+    },
+    [navigate]
+  );
+
   const emptyStateMarkup = (
     <EmptyState
       heading="Configure your shipping zones"
+      action={{ content: "Add zone", url: "/app/zones/new" }}
       image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
     >
       <p>
@@ -76,7 +78,12 @@ export default function Zones() {
   );
 
   const rowMarkup = zones.map((zone, index) => (
-    <IndexTable.Row id={zone.id} key={zone.id} position={index}>
+    <IndexTable.Row
+      id={zone.id}
+      key={zone.id}
+      position={index}
+      onClick={() => handleRowClick(zone.id)}
+    >
       <IndexTable.Cell>
         <Text variant="bodyMd" fontWeight="bold" as="span">
           {zone.name}
