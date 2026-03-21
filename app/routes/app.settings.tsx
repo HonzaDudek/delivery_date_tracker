@@ -120,6 +120,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   if (intent === "deleteExcludedDate") {
     const dateId = String(formData.get("dateId"));
+    // Verify the excluded date belongs to this shop before deleting
+    const excludedDate = await prisma.excludedDate.findFirst({
+      where: { id: dateId, shopId: shop.id },
+    });
+    if (!excludedDate) {
+      return json({ status: "error", message: "Excluded date not found" }, { status: 404 });
+    }
     await prisma.excludedDate.delete({ where: { id: dateId } });
     return json({ status: "success", message: "Excluded date removed" });
   }

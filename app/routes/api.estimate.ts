@@ -2,6 +2,7 @@ import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import prisma from "../db.server";
 import { calculateDeliveryEstimate } from "../services/delivery-calculator";
+import { checkRateLimit } from "../utils/rate-limiter";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
@@ -12,6 +13,21 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   if (!shopDomain) {
     return json({ error: "Missing shop parameter" }, { status: 400 });
+  }
+
+  // Rate limit: 60 requests per minute per shop
+  const rateLimit = checkRateLimit(`estimate:${shopDomain}`);
+  if (!rateLimit.allowed) {
+    return json(
+      { error: "Rate limit exceeded. Please try again later." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil(rateLimit.retryAfterMs / 1000)),
+          "X-RateLimit-Remaining": "0",
+        },
+      },
+    );
   }
 
   const shop = await prisma.shop.findUnique({
@@ -64,6 +80,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     headers: {
       "Cache-Control": "public, max-age=300",
       "Access-Control-Allow-Origin": "*",
+      "X-RateLimit-Remaining": String(rateLimit.remaining),
     },
   });
 };

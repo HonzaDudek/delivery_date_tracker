@@ -18,10 +18,14 @@ import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
-  await authenticate.admin(request);
+  const { session } = await authenticate.admin(request);
 
-  const zone = await prisma.shippingZone.findUnique({
-    where: { id: params.id },
+  const shop = await prisma.shop.findUnique({
+    where: { shopifyDomain: session.shop },
+  });
+
+  const zone = await prisma.shippingZone.findFirst({
+    where: { id: params.id, shopId: shop?.id ?? "" },
   });
 
   if (!zone) {
@@ -35,6 +39,23 @@ export const action = async ({ request, params }: ActionFunctionArgs) => {
   const { session } = await authenticate.admin(request);
   const formData = await request.formData();
   const intent = formData.get("intent");
+
+  const shop = await prisma.shop.findUnique({
+    where: { shopifyDomain: session.shop },
+  });
+
+  if (!shop) {
+    return json({ status: "error", message: "Shop not found" }, { status: 404 });
+  }
+
+  // Verify zone belongs to this shop
+  const existingZone = await prisma.shippingZone.findFirst({
+    where: { id: params.id, shopId: shop.id },
+  });
+
+  if (!existingZone) {
+    return json({ status: "error", message: "Zone not found" }, { status: 404 });
+  }
 
   if (intent === "delete") {
     await prisma.shippingZone.delete({ where: { id: params.id } });
