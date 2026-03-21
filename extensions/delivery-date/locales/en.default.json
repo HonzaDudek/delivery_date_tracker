@@ -4,5 +4,7 @@
   "delivery_range": "{{ start }} – {{ end }}",
   "via_carrier": "via {{ carrier }}",
   "unavailable": "Delivery estimate unavailable",
-  "loading": "Calculating delivery estimate..."
+  "loading": "Calculating delivery estimate...",
+  "fallback": "Contact us for delivery estimates.",
+  "order_within": "Order within {{ time }} to get it by {{ date }}"
 }

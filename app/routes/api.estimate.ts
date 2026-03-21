@@ -7,6 +7,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
   const shopDomain = url.searchParams.get("shop");
   const countryCode = url.searchParams.get("country") || "US";
+  const productId = url.searchParams.get("productId");
+  const variantId = url.searchParams.get("variantId");
 
   if (!shopDomain) {
     return json({ error: "Missing shop parameter" }, { status: 400 });
@@ -45,6 +47,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       recurring: d.recurring,
     })),
   });
+
+  // Log the estimate for analytics (fire-and-forget)
+  prisma.estimateLog
+    .create({
+      data: {
+        shopId: shop.id,
+        productId: productId || null,
+        zone: zone.name,
+        estimate: JSON.stringify(estimate),
+      },
+    })
+    .catch(() => {});
 
   return json(estimate, {
     headers: {

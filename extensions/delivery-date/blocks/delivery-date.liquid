@@ -1,67 +1,107 @@
 {% comment %}
   Estimated Delivery Date — Theme App Extension Block
   Displays estimated delivery date range on product pages.
+  Merchant-customizable via theme editor settings.
 {% endcomment %}
 
 <div
   id="edd-delivery-estimate"
-  class="edd-container"
+  class="edd-container edd-align-{{ block.settings.text_alignment }}"
   data-shop="{{ shop.permanent_domain }}"
   data-country="{{ localization.country.iso_code }}"
   data-product-id="{{ product.id }}"
+  data-variant-id="{{ product.selected_or_first_available_variant.id }}"
   data-heading="{{ block.settings.heading }}"
   data-show-carrier="{{ block.settings.show_carrier }}"
+  data-show-icon="{{ block.settings.show_icon }}"
   data-date-format="{{ block.settings.date_format }}"
+  data-cache-ttl="{{ block.settings.cache_minutes }}"
+  style="
+    --edd-accent-color: {{ block.settings.accent_color }};
+    --edd-text-color: {{ block.settings.text_color }};
+    --edd-bg-color: {{ block.settings.background_color }};
+    --edd-border-color: {{ block.settings.border_color }};
+    --edd-font-size: {{ block.settings.font_size }}px;
+  "
 >
-  <div class="edd-loading">
-    <span class="edd-spinner"></span>
-    <span>{{ block.settings.heading | default: "Estimated Delivery" }}...</span>
+  <div class="edd-loading" aria-live="polite" aria-busy="true">
+    <span class="edd-spinner" aria-hidden="true"></span>
+    <span>{{ block.settings.loading_text | default: 'Calculating delivery estimate...' }}</span>
   </div>
   <noscript>
-    <p>Enable JavaScript to see estimated delivery dates.</p>
+    <div class="edd-fallback">
+      <span class="edd-icon" aria-hidden="true">&#x1F4E6;</span>
+      <span>{{ block.settings.fallback_text | default: 'Contact us for delivery estimates.' }}</span>
+    </div>
   </noscript>
 </div>
 
 <style>
   .edd-container {
-    padding: 12px 0;
+    padding: 12px 16px;
+    margin: 8px 0;
     font-family: inherit;
+    font-size: var(--edd-font-size, 14px);
+    color: var(--edd-text-color, inherit);
+    background-color: var(--edd-bg-color, transparent);
+    border: 1px solid var(--edd-border-color, transparent);
+    border-radius: 6px;
+    line-height: 1.4;
   }
+  .edd-align-left { text-align: left; }
+  .edd-align-center { text-align: center; }
+  .edd-align-right { text-align: right; }
+
   .edd-heading {
     font-weight: 600;
     margin-bottom: 4px;
-    font-size: 0.875rem;
+    font-size: 0.9em;
+    color: var(--edd-text-color, inherit);
   }
   .edd-date {
-    font-size: 1rem;
+    font-size: 1.1em;
     font-weight: 700;
-    color: var(--edd-color, #2c6e49);
+    color: var(--edd-accent-color, #2c6e49);
   }
   .edd-carrier {
-    font-size: 0.75rem;
-    color: #666;
+    font-size: 0.8em;
+    color: var(--edd-text-color, #666);
+    opacity: 0.8;
     margin-top: 2px;
   }
+  .edd-icon {
+    margin-right: 6px;
+  }
+
   .edd-loading {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #888;
-    font-size: 0.875rem;
+    color: var(--edd-text-color, #888);
+    font-size: 0.9em;
   }
   .edd-spinner {
     width: 14px;
     height: 14px;
-    border: 2px solid #ddd;
-    border-top-color: #333;
+    border: 2px solid var(--edd-border-color, #ddd);
+    border-top-color: var(--edd-accent-color, #333);
     border-radius: 50%;
     animation: edd-spin 0.6s linear infinite;
   }
+
+  .edd-fallback {
+    display: flex;
+    align-items: center;
+    font-size: 0.9em;
+    color: var(--edd-text-color, #666);
+  }
+
   .edd-error {
     display: none;
-    color: #888;
-    font-size: 0.875rem;
+    color: var(--edd-text-color, #888);
+    font-size: 0.9em;
   }
+
   @keyframes edd-spin {
     to { transform: rotate(360deg); }
   }
@@ -75,15 +115,37 @@
   "target": "section",
   "settings": [
     {
+      "type": "header",
+      "content": "Content"
+    },
+    {
       "type": "text",
       "id": "heading",
       "label": "Heading",
       "default": "Estimated Delivery"
     },
     {
+      "type": "text",
+      "id": "loading_text",
+      "label": "Loading text",
+      "default": "Calculating delivery estimate..."
+    },
+    {
+      "type": "text",
+      "id": "fallback_text",
+      "label": "Fallback text (no JavaScript)",
+      "default": "Contact us for delivery estimates."
+    },
+    {
       "type": "checkbox",
       "id": "show_carrier",
       "label": "Show carrier name",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_icon",
+      "label": "Show delivery icon",
       "default": true
     },
     {
@@ -96,6 +158,69 @@
         { "value": "short", "label": "Short (Mar 25)" },
         { "value": "numeric", "label": "Numeric (03/25/2026)" }
       ]
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color (dates)",
+      "default": "#2c6e49"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#f8f9fa"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#e9ecef"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font size (px)",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "default": 14,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "default": "left",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Performance"
+    },
+    {
+      "type": "range",
+      "id": "cache_minutes",
+      "label": "Cache duration (minutes)",
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "default": 5,
+      "unit": "min"
     }
   ]
 }
