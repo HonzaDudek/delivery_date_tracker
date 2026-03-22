@@ -1,6 +1,9 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
+import { validateSubscriptionPayload } from "../services/subscription-webhook";
+import { BillingService } from "../services/billing";
+import { prismaShopStore } from "../services/billing-store.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { topic, shop, session, admin } =
@@ -63,6 +66,40 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           console.error(`Failed GDPR shop redact for ${shop}:`, err);
         });
       break;
+
+    case "APP_SUBSCRIPTIONS_UPDATE": {
+      const payload = await request.json().catch(() => null);
+      if (!validateSubscriptionPayload(payload)) {
+        console.error("Invalid APP_SUBSCRIPTIONS_UPDATE payload");
+        break;
+      }
+
+      const shopRecord = await prisma.shop.findUnique({
+        where: { shopifyDomain: shop },
+      });
+
+      if (shopRecord) {
+        const billing = new BillingService(
+          {
+            query: async (query, variables) => {
+              const response = await admin!.graphql(query, {
+                variables: variables as Record<string, unknown>,
+              });
+              return response.json();
+            },
+          },
+          prismaShopStore,
+          process.env.SHOPIFY_APP_URL || "",
+        );
+
+        await billing.handleSubscriptionUpdate(
+          shopRecord.id,
+          payload.app_subscription.admin_graphql_api_id,
+          payload.app_subscription.status,
+        );
+      }
+      break;
+    }
 
     default:
       throw new Response("Unhandled webhook topic", { status: 404 });
