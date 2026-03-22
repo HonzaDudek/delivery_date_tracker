@@ -29,5 +29,5 @@ embedded = false
 
 [build]
 automatically_update_urls_on_dev = true
-dev_store_url = ""
+dev_store_url = "hoopoe-corp.myshopify.com"
 include_config_on_deploy = true
