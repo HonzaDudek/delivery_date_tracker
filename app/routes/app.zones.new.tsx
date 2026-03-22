@@ -16,6 +16,8 @@ import { useState, useCallback } from "react";
 
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
+import { canCreateZone } from "../services/plan-enforcement";
+import type { PlanId } from "../services/billing-types";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await authenticate.admin(request);
@@ -32,6 +34,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   if (!shop) {
     return json({ status: "error", message: "Shop not found. Please visit Settings first." });
+  }
+
+  // Plan enforcement: check zone limit
+  const zoneCount = await prisma.shippingZone.count({ where: { shopId: shop.id } });
+  const enforcement = canCreateZone({
+    plan: shop.plan as PlanId,
+    currentZoneCount: zoneCount,
+  });
+  if (!enforcement.allowed) {
+    return json({ status: "error", message: enforcement.reason ?? "Zone limit reached. Upgrade to Pro for unlimited zones." });
   }
 
   const name = String(formData.get("name") || "").trim();

@@ -25,19 +25,21 @@ model Session {
 }
 
 model Shop {
-  id             String         @id @default(cuid())
-  shopifyDomain  String         @unique
-  shopifyId      String         @unique
-  plan           String         @default("free")
-  processingDays Int            @default(1)
-  cutoffTime     String         @default("14:00")
-  timezone       String         @default("America/New_York")
-  skipWeekends   Boolean        @default(true)
-  installedAt    DateTime       @default(now())
-  settings       String?
-  shippingZones  ShippingZone[]
-  excludedDates  ExcludedDate[]
-  estimateLogs   EstimateLog[]
+  id                 String         @id @default(cuid())
+  shopifyDomain      String         @unique
+  shopifyId          String         @unique
+  plan               String         @default("free")
+  subscriptionId     String?
+  subscriptionStatus String?
+  processingDays     Int            @default(1)
+  cutoffTime         String         @default("14:00")
+  timezone           String         @default("America/New_York")
+  skipWeekends       Boolean        @default(true)
+  installedAt        DateTime       @default(now())
+  settings           String?
+  shippingZones      ShippingZone[]
+  excludedDates      ExcludedDate[]
+  estimateLogs       EstimateLog[]
 }
 
 model ShippingZone {
