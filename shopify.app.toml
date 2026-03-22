@@ -1,8 +1,13 @@
 # This file stores configurations for your Shopify app.
 # Learn more: https://shopify.dev/docs/apps/tools/cli/configuration
 
-scopes = "read_products,read_shipping,write_shipping"
+client_id = "6327474d672027619ca352909f275ec1"
 name = "Estimated Delivery Dates"
+application_url = "https://localhost"
+embedded = true
+
+[access_scopes]
+scopes = "read_products,read_shipping,write_shipping"
 
 [webhooks]
 api_version = "2025-01"

@@ -3,6 +3,7 @@ api_version = "2025-01"
 [[extensions]]
 name = "Estimated Delivery Date"
 handle = "delivery-date"
+uid = "1e29f333-f7c8-b03f-d483-a7cdb79cd8f96c31405f"
 type = "theme"
 
   [[extensions.blocks]]
