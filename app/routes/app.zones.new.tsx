@@ -12,7 +12,7 @@ import {
   PageActions,
   Banner,
 } from "@shopify/polaris";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";

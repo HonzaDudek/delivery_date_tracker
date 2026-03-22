@@ -29,7 +29,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function Auth() {
-  const { errors } = (useActionData<typeof action>() || useLoaderData<typeof loader>()) as { errors: { shop?: string } };
+  const loaderData = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
+  const errors = (actionData?.errors || loaderData.errors) as { shop?: string } | undefined;
   const [shop, setShop] = useState("");
 
   return (

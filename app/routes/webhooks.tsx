@@ -3,7 +3,7 @@ import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { topic, shop, session, admin, payload } =
+  const { topic, shop, session, admin } =
     await authenticate.webhook(request);
 
   if (!admin) {

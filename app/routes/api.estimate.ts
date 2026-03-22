@@ -9,8 +9,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const shopDomain = url.searchParams.get("shop");
   const countryCode = url.searchParams.get("country") || "US";
   const productId = url.searchParams.get("productId");
-  const variantId = url.searchParams.get("variantId");
-
   if (!shopDomain) {
     return json({ error: "Missing shop parameter" }, { status: 400 });
   }
